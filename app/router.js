@@ -11,4 +11,5 @@ module.exports = app => {
 
   router.get('/projects', projects.list);
   router.post('/projects', projects.create);
+  router.get('/projects/:id', projects.read);
 };
