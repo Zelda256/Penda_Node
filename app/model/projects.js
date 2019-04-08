@@ -33,6 +33,10 @@ module.exports = app => {
       type: Number,
       require: true,
     },
+    process: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Process',
+    }],
     budget: {
       type: Number,
     },

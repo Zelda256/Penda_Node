@@ -5,29 +5,23 @@ module.exports = app => {
   const Schema = mongoose.Schema;
 
   const ProcessSchema = new Schema({
-    projectId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Projects',
+    name: {
+      type: String,
+      require: true,
     },
-    process: [{
-      name: {
-        type: String,
-        require: true,
-      },
-      cost: {
-        type: Number,
-      },
-      member: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Users',
-      }],
-      startDate: {
-        type: Date,
-      },
-      deadLine: {
-        type: Date,
-      },
+    cost: {
+      type: Number,
+    },
+    member: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Users',
     }],
+    startDate: {
+      type: Date,
+    },
+    deadLine: {
+      type: Date,
+    },
   });
 
   return mongoose.model('Process', ProcessSchema);

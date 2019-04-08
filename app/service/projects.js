@@ -65,6 +65,18 @@ class ProjectService extends Service {
     });
     return project;
   }
+  async findOne(_id) {
+    const { ctx } = this;
+    const { Projects } = ctx.model;
+
+    return await Projects.findById(_id);
+  }
+  async updateProcess(_id, obj) {
+    const { ctx } = this;
+    const { Projects } = ctx.model;
+
+    return await Projects.updateOne({ _id }, { process: obj });
+  }
 }
 
 module.exports = ProjectService;
