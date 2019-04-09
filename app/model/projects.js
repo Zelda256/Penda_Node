@@ -17,7 +17,7 @@ module.exports = app => {
       type: Date,
       require: true,
     },
-    team: [{
+    member: [{
       type: Schema.Types.ObjectId,
       ref: 'Users',
     }],

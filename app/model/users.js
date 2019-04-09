@@ -24,6 +24,16 @@ module.exports = app => {
     phone: {
       type: String,
       require: true,
+    },
+    teams: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Teams',
+    }],
+    department: {
+      type: String,
+    },
+    job: {
+      type: String,
     }
   });
 

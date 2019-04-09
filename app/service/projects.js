@@ -26,7 +26,7 @@ class ProjectService extends Service {
     // 项目中的负责人 & 参与者
     projects.forEach(project => {
       if (!partners.includes(project.creator)) partners.push(String(project.creator));
-      project.team.forEach(man => {
+      project.member.forEach(man => {
         if (!partners.includes(man)) partners.push(String(man));
       });
     });
@@ -35,7 +35,7 @@ class ProjectService extends Service {
     projects.forEach(project => {
       const creator = users.find((item => item._id.toString() === project.creator.toString()));
       if (creator) project.creator = creator;
-      project.team = project.team.map(man => {
+      project.member = project.member.map(man => {
         let temp = users.find((item => item._id.toString() === man.toString()));
         if (temp) return temp;
       });
@@ -44,14 +44,14 @@ class ProjectService extends Service {
   }
   async read() {
     const { ctx } = this;
-    const { Projects, Users } = ctx.model;
+    const { Projects, Users, Process } = ctx.model;
     const id = ctx.params.id;
     // 所有项目
     const project = await Projects.findOne({ id });
     const partners = [];
     // 项目中的负责人 & 参与者
     partners.push(String(project.creator));
-    project.team.forEach(man => {
+    project.member.forEach(man => {
       if (!partners.includes(man)) partners.push(String(man));
     });
 
@@ -59,10 +59,25 @@ class ProjectService extends Service {
     const users = await Users.where('_id').in(partners);
     const creator = users.find((item => item._id.toString() === project.creator.toString()));
     if (creator) project.creator = creator;
-    project.team = project.team.map(man => {
+    project.member = project.member.map(man => {
       let temp = users.find((item => item._id.toString() === man.toString()));
       if (temp) return temp;
     });
+
+    // 将项目中的processID换成process对象
+    if (project.process.length) {
+      const process = await Process.where('_id').in(project.process);
+      process.map(pro => {
+        if (pro.member.length) {
+          pro.member = pro.member.map(man => {
+            let temp = users.find((item => item._id.toString() === man.toString()));
+            if (temp) return temp;
+          });
+        }
+      });
+
+      project.process = process;
+    }
     return project;
   }
   async findOne(_id) {

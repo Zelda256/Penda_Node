@@ -16,6 +16,10 @@ module.exports = app => {
       type: Schema.Types.ObjectId,
       ref: 'Users',
     }],
+    status: {
+      type: Number,
+      require: true,
+    },
     startDate: {
       type: Date,
     },
