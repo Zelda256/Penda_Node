@@ -41,6 +41,9 @@ module.exports = appInfo => {
     },
   };
 
+  // passport-local
+  config.auth_cookie_name = 'penda';
+
   return {
     ...config,
     ...userConfig,

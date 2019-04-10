@@ -1,6 +1,11 @@
 const Controller = require('egg').Controller;
 
 class UserController extends Controller {
+  async logout() {
+    const {ctx} = this;
+    ctx.logout();
+    ctx.redirect(ctx.get('referer') || '/');
+  }
   async create() {
     const { ctx } = this;
     const { users } = this.service;

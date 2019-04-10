@@ -6,6 +6,9 @@
 module.exports = app => {
   const { router, controller } = app;
   const { users, projects, process } = controller;
+  router.post('/login', app.passport.authenticate('local',{ successRedirect: false }));
+
+
   router.get('/users', users.list);
   router.post('/users', users.create);
 
