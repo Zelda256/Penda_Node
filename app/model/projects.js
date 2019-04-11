@@ -17,10 +17,10 @@ module.exports = app => {
       type: Date,
       require: true,
     },
-    member: [{
+    team: {
       type: Schema.Types.ObjectId,
-      ref: 'Users',
-    }],
+      ref: 'Teams',
+    },
     name: {
       type: String,
       require: true,

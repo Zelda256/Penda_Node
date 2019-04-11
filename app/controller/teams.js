@@ -3,8 +3,8 @@ const Controller = require('egg').Controller;
 class TeamsController extends Controller {
   async create() {
     const { ctx } = this;
-    const { users } = this.service;
-    const result = await users.create();
+    const { teams } = this.service;
+    const result = await teams.create();
     ctx.body = {
       status: 1,
       data: result,
@@ -13,8 +13,8 @@ class TeamsController extends Controller {
   }
   async list() {
     const { ctx } = this;
-    const { users } = this.service;
-    const result = await users.list();
+    const { teams } = this.service;
+    const result = await teams.list();
     ctx.body = {
       status: 1,
       data: result,

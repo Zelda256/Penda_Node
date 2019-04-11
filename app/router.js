@@ -5,7 +5,7 @@
  */
 module.exports = app => {
   const { router, controller } = app;
-  const { users, projects, process } = controller;
+  const { users, projects, process, teams } = controller;
   router.post('/login', app.passport.authenticate('local',{ successRedirect: false }));
 
 
@@ -17,4 +17,7 @@ module.exports = app => {
   router.get('/projects/:id', projects.read);
 
   router.post('/process/:id', process.create);
+
+  router.get('/teams', teams.list);
+  router.post('/teams', teams.create);
 };

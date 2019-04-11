@@ -25,6 +25,12 @@ class UserService extends Service {
     const { Users } = ctx.model;
     return await Users.findOne({ name });
   }
+  async updateTeam(userIdArr, teamId) {
+    const { ctx } = this;
+    const { Users } = ctx.model;
+   
+    return await Users.updateMany({_id: { $in : userIdArr}}, {$addToSet : {teams: teamId}});
+  }
 }
 
 module.exports = UserService;

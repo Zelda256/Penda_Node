@@ -19,65 +19,43 @@ class ProjectService extends Service {
 
   async list() {
     const { ctx } = this;
-    const { Projects, Users } = ctx.model;
+    const { Projects } = ctx.model;
+    const { teams } = ctx.service;
     // 所有项目
-    const projects = await Projects.find();
-    const partners = [];
-    // 项目中的负责人 & 参与者
+    const projects = await Projects.find().populate('creator');
+    const teamIdArr = [];
+    // 数组中所有项目的团队id
     projects.forEach(project => {
-      if (!partners.includes(project.creator)) partners.push(String(project.creator));
-      project.member.forEach(man => {
-        if (!partners.includes(man)) partners.push(String(man));
-      });
+      if (!teamIdArr.includes(project.team)) teamIdArr.push(project.team);
     });
-    // 将项目中的参与者id替换成参与者对象
-    const users = await Users.where('_id').in(partners);
+
+    const teamsArr = await teams.listByIdArr(teamIdArr);
+    // 将项目中的团队id替换成团队成员
     projects.forEach(project => {
-      const creator = users.find((item => item._id.toString() === project.creator.toString()));
-      if (creator) project.creator = creator;
-      project.member = project.member.map(man => {
-        let temp = users.find((item => item._id.toString() === man.toString()));
-        if (temp) return temp;
-      });
+      project.team = teamsArr.find((item => item._id.toString() === project.team.toString()));
     });
+
     return projects;
   }
   async read() {
     const { ctx } = this;
-    const { Projects, Users, Process } = ctx.model;
+    const { Projects, Process } = ctx.model;
+    const { teams } = ctx.service;
     const id = ctx.params.id;
+    console.log(id);
     // 所有项目
-    const project = await Projects.findOne({ id });
-    const partners = [];
-    // 项目中的负责人 & 参与者
-    partners.push(String(project.creator));
-    project.member.forEach(man => {
-      if (!partners.includes(man)) partners.push(String(man));
-    });
+    const project = await Projects.findById(id).populate('creator');
 
-    // 将项目中的参与者id替换成参与者对象
-    const users = await Users.where('_id').in(partners);
-    const creator = users.find((item => item._id.toString() === project.creator.toString()));
-    if (creator) project.creator = creator;
-    project.member = project.member.map(man => {
-      let temp = users.find((item => item._id.toString() === man.toString()));
-      if (temp) return temp;
-    });
+    // 更新团队id为团队成员
+    const team = await teams.readById(project.team);
+    project.team = team;
 
     // 将项目中的processID换成process对象
-    if (project.process.length) {
-      const process = await Process.where('_id').in(project.process);
-      process.map(pro => {
-        if (pro.member.length) {
-          pro.member = pro.member.map(man => {
-            let temp = users.find((item => item._id.toString() === man.toString()));
-            if (temp) return temp;
-          });
-        }
-      });
-
+    if (project.process && project.process.length) {
+      const process = await Process.where('_id').in(project.process).populate('member');
       project.process = process;
     }
+
     return project;
   }
   async findOne(_id) {
