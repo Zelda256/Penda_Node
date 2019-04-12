@@ -20,23 +20,12 @@ class ProjectService extends Service {
   async list() {
     const { ctx } = this;
     const { Projects } = ctx.model;
-    const { teams } = ctx.service;
     // 所有项目
-    const projects = await Projects.find().populate('creator');
-    const teamIdArr = [];
-    // 数组中所有项目的团队id
-    projects.forEach(project => {
-      if (!teamIdArr.includes(project.team)) teamIdArr.push(project.team);
-    });
-
-    const teamsArr = await teams.listByIdArr(teamIdArr);
-    // 将项目中的团队id替换成团队成员
-    projects.forEach(project => {
-      project.team = teamsArr.find((item => item._id.toString() === project.team.toString()));
-    });
-
-    return projects;
+    const curUser = ctx.user;
+    const teams = curUser.teams;
+    return await Projects.find({ team: { $in: teams } });
   }
+
   async read() {
     const { ctx } = this;
     const { Projects, Process } = ctx.model;
@@ -55,9 +44,9 @@ class ProjectService extends Service {
       const process = await Process.where('_id').in(project.process).populate('member');
       project.process = process;
     }
-
     return project;
   }
+  
   async findOne(_id) {
     const { ctx } = this;
     const { Projects } = ctx.model;

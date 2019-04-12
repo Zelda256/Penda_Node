@@ -6,7 +6,6 @@ class UserService extends Service {
     const { Users } = ctx.model;
     const user = new Users(ctx.request.body);
     const result = await user.save();
-    // console.log(result);
     return result;
   }
   async list() {
@@ -28,8 +27,11 @@ class UserService extends Service {
   async updateTeam(userIdArr, teamId) {
     const { ctx } = this;
     const { Users } = ctx.model;
-   
-    return await Users.updateMany({_id: { $in : userIdArr}}, {$addToSet : {teams: teamId}});
+
+    return await Users.updateMany(
+      { _id: { $in: userIdArr } },
+      { $addToSet: { teams: teamId } }
+    );
   }
 }
 

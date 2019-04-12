@@ -19,11 +19,9 @@ module.exports = app => {
     },
     email: {
       type: String,
-      require: true,
     },
     phone: {
       type: String,
-      require: true,
     },
     teams: [{
       type: Schema.Types.ObjectId,

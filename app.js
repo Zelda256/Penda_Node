@@ -43,6 +43,7 @@ module.exports = app => {
       };
       ctx.cookies.set(app.config.auth_cookie_name, auth_token, options);
       console.log('existUser', existUser);
+      ctx.user = existUser;
       ctx.body = {
         status: 1,
         data: existUser,
@@ -67,6 +68,7 @@ module.exports = app => {
       user = await ctx.service.users.readBy_id(user_id);
       console.log('34', user);
       if (!user) return user;
+      ctx.user = user;
     }
     ctx.body = {
       status: 1,

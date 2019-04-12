@@ -14,7 +14,6 @@ class TeamsService extends Service {
     // 将团队id加入到每个团队者中的team数组
     const teamId = result._id;
     return await users.updateTeam(team.member, teamId);
-    // return result;
   }
 
   async list() {
