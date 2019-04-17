@@ -20,7 +20,7 @@ class TeamsService extends Service {
     const { ctx } = this;
     const { Teams } = ctx.model;
 
-    return await Teams.find().populate('member');
+    return await Teams.find({_id: { $in : ctx.user.teams}}).populate('member');
   }
 
   async readById(_id) {
