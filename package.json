@@ -31,6 +31,8 @@
     "start1": "egg-scripts start --daemon --title=egg-server-penda_node",
     "stop1": "egg-scripts stop --title=egg-server-penda_node",
     "start": "egg-bin dev",
+    "startPro": "egg-scripts start --daemon --port=7001 --title=egg-server-penda_node",
+    "stopPro": "egg-scripts stop --title=egg-server-penda_node",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",
