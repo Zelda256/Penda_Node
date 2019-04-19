@@ -18,7 +18,7 @@ module.exports = appInfo => {
   config.cluster = {
     listen: {
       port: 7001,
-      hostname: '0.0.0.0',
+      hostname: '127.0.0.1',
     }
   };
 
@@ -38,7 +38,8 @@ module.exports = appInfo => {
   };
 
   config.cors = {
-    // {string|Function} origin: '*',
+    // {string|Function} origin: '*',    
+    origin: '*',
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
     credentials: true,
 
