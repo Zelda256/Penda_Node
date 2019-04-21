@@ -18,6 +18,16 @@ class ProcessController extends Controller {
   async read() {
 
   }
+  async updateStatus() {
+    const { ctx } = this;
+    const { process } = this.service;
+    const result = await process.updateStatus(ctx.params.id);
+    ctx.body = {
+      status: 1,
+      data: result,
+      msg: null
+    };
+  }
 }
 
 module.exports = ProcessController;

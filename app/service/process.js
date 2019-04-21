@@ -22,14 +22,10 @@ class ProcessService extends Service {
     project.process.forEach(process => {
       if (process.status === 3) { finishCnt++; console.log(process._id); }
     });
-    // finishCnt++;
     const processCnt = project.process ? project.process.length : 0;
-    project.progress = (finishCnt / processCnt).toFixed(2) * 100;
-    console.log(finishCnt, processCnt, project.progress);
-    // console.log('project$!$@#@#23333333333', project);
-    // return null;
-    // 更新子任务涉及到更新项目的过程
-    return await projects.updateById(_id, project);
+    await projects.updateProgress(_id, finishCnt, processCnt);
+
+    return result;
   }
 
   async list() {
@@ -47,6 +43,29 @@ class ProcessService extends Service {
     const processCost = await this.readById(id);
     processCost.cost += costValue;
     return await Process.updateOne({ _id: id }, { cost: processCost.cost });
+  }
+
+  async updateStatus(id) {
+    const { ctx } = this;
+    const { Process } = ctx.model;
+    const { projects } = this.service;
+    const obj = ctx.request.body;
+    console.log('?????obj', obj);
+    const { status, projectId } = obj;
+    if (!status) return;
+    // 更新子任务状态
+    const result = await Process.updateOne({ _id: id }, { status });
+    // 获取项目详情
+    const project = await projects.read(projectId);
+    // 计算已完成子任务数和未完成子任务数
+    let finishCnt = 0;
+    project.process.forEach(process => {
+      if (process.status === 3) { finishCnt++; console.log(process._id); }
+    });
+    const processCnt = project.process ? project.process.length : 0;
+    // 更新项目进度
+    await projects.updateProgress(projectId, finishCnt, processCnt);
+    return result;
   }
 }
 

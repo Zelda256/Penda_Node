@@ -76,12 +76,19 @@ class ProjectService extends Service {
     });
   }
   async updateLeftBudget(_id, leftBudgetValue) {
-    // const { ctx } = this;
-    // const { Projects } = ctx.model;
     const project = await this.findOne(_id);
-    console.log('$$$@#$',project);
+    console.log('$$$@#$', project);
     project.leftBudget -= leftBudgetValue;
     return await this.updateById(_id, project);
+  }
+  async updateProgress(_id, finishProc, totalProc) {
+    const { ctx } = this;
+    const { Projects } = ctx.model;
+    const progress = ((finishProc / totalProc).toFixed(2) * 100).toFixed(0);
+
+    console.log('计算progress:',finishProc, totalProc, progress);
+
+    return await Projects.updateOne({ _id }, { progress });
   }
 }
 
