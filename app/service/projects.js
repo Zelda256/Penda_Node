@@ -6,6 +6,8 @@ class ProjectService extends Service {
     const { ctx } = this;
     const { Projects } = ctx.model;
     const item = ctx.request.body;
+    item.progress = 0;
+    item.leftBudget = item.budget;
     await fetch('https://www.random.org/strings/?num=1&len=5&digits=on&upperalpha=on&loweralpha=on&format=plain')
       .then(res => res.text())
       .then(text => item.id = text.substr(0, 5));  // 删除换行符
@@ -26,13 +28,13 @@ class ProjectService extends Service {
     return await Projects.find({ team: { $in: teams } });
   }
 
-  async read() {
+  async read(id) {
     const { ctx } = this;
     const { Projects, Process } = ctx.model;
     const { teams } = ctx.service;
-    const id = ctx.params.id;
+    // const id = ctx.params.id;
     console.log(id);
-    // 所有项目
+    // 查询项目
     const project = await Projects.findById(id).populate('creator');
 
     // 更新团队id为团队成员
@@ -44,20 +46,42 @@ class ProjectService extends Service {
       const process = await Process.where('_id').in(project.process).populate('member');
       project.process = process;
     }
+
     return project;
   }
-  
+
   async findOne(_id) {
     const { ctx } = this;
     const { Projects } = ctx.model;
 
     return await Projects.findById(_id);
   }
-  async updateProcess(_id, obj) {
+  async updateById(_id, obj) {
     const { ctx } = this;
     const { Projects } = ctx.model;
-
-    return await Projects.updateOne({ _id }, { process: obj });
+    const { startDate, team, name, deadLine, progress, process, budget, leftBudget, status, priority, description, remark } = obj;
+    return await Projects.updateOne({ _id }, {
+      startDate,
+      team,
+      name,
+      deadLine,
+      progress,
+      process,
+      budget,
+      leftBudget,
+      status,
+      priority,
+      description,
+      remark
+    });
+  }
+  async updateLeftBudget(_id, leftBudgetValue) {
+    // const { ctx } = this;
+    // const { Projects } = ctx.model;
+    const project = await this.findOne(_id);
+    console.log('$$$@#$',project);
+    project.leftBudget -= leftBudgetValue;
+    return await this.updateById(_id, project);
   }
 }
 

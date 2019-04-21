@@ -9,6 +9,9 @@ module.exports = app => {
       type: String,
       require: true,
     },
+    budge: {
+      type: Number,
+    },
     cost: {
       type: Number,
     },
@@ -17,7 +20,7 @@ module.exports = app => {
       ref: 'Users',
     }],
     status: {
-      type: Number,
+      type: Number,  // 1将开始 2进行中 3已完成
       require: true,
     },
     startDate: {

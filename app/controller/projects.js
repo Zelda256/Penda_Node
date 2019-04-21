@@ -24,7 +24,7 @@ class ProjectController extends Controller {
   async read() {
     const { ctx } = this;
     const { projects } = this.service;
-    const result = await projects.read();
+    const result = await projects.read(ctx.params.id);
     ctx.body = {
       status: 1,
       data: result,

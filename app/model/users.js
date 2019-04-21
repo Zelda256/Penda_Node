@@ -5,16 +5,21 @@ module.exports = app => {
   const Schema = mongoose.Schema;
 
   const UsersSchema = new Schema({
-    name: { 
+    name: {
       type: String,
       require: true,
     },
-    password: { 
+    password: {
       type: String,
       require: true,
     },
     avatar: {
       type: String,
+      require: true,
+    },
+    identity: {
+      type: Number,
+      enum: [1, 2],
       require: true,
     },
     email: {

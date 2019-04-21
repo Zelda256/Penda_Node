@@ -37,12 +37,11 @@ module.exports = app => {
       type: Schema.Types.ObjectId,
       ref: 'Process',
     }],
-    budget: {
+    budget: {   // 总预算
       type: Number,
     },
-    moneyType: {
-      type: String,
-      enum: ['RMB', 'Dollar'],
+    leftBudget: {   // 剩余金额
+      type: Number,
     },
     status: {
       type: Number,
