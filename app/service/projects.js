@@ -24,6 +24,7 @@ class ProjectService extends Service {
     const { Projects } = ctx.model;
     // 所有项目
     const curUser = ctx.user;
+    if (!curUser) return;
     const teams = curUser.teams;
     return await Projects.find({ team: { $in: teams } });
   }

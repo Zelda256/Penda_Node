@@ -10,6 +10,7 @@ module.exports = app => {
     successRedirect: false
   })
   );
+  router.get('/logout', users.logout);
 
   router.get('/users', users.list);
   router.post('/users', users.create);
