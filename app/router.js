@@ -5,7 +5,7 @@
  */
 module.exports = app => {
   const { router, controller } = app;
-  const { users, projects, process, teams, refundAmount, refunds } = controller;
+  const { users, projects, process, teams, refundAmount, refunds, contacts } = controller;
   router.post('/login', app.passport.authenticate('local', {
     successRedirect: false
   })
@@ -14,6 +14,12 @@ module.exports = app => {
 
   router.get('/users', users.list);
   router.post('/users', users.create);
+  router.put('/users/:id', users.updateBasicInfo);
+
+  router.post('/contacts', contacts.create);
+  router.post('/contacts/:id', contacts.addToContactById);
+  router.get('/contacts', contacts.listByUserId);
+  router.put('/contacts/:id', contacts.deleteContactById);
 
   router.get('/projects', projects.list);
   router.post('/projects', projects.create);
