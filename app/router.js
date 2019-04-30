@@ -33,7 +33,8 @@ module.exports = app => {
   router.post('/refundAmount/:id', refundAmount.create);
   router.get('/refundAmount/:id', refundAmount.readByProjectId);
 
-  router.post('/refunds', refunds.create);
+  router.post('/refunds', refunds.create);  
+  router.get('/refunds', refunds.list);
 
   router.get('/teams', teams.list);
   router.post('/teams', teams.create);

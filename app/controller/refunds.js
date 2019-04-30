@@ -12,7 +12,22 @@ class RefundsController extends Controller {
     };
   }
   async list() {
-
+    const { ctx } = this;
+    const { refunds } = this.service;
+    const result = await refunds.list();
+    if (!result) {
+      ctx.body = {
+        status: 0,
+        msg: null
+      };
+    } else {
+      ctx.body = {
+        status: 1,
+        data: result,
+        msg: null
+      };
+    }
+    
   }
   async readByProjectId() {
     const { ctx } = this;

@@ -29,6 +29,10 @@ module.exports = app => {
     value: {
       type: Number,
       require: true,
+    },
+    date: {
+      type: Date,
+      require: true,
     }
   });
 
