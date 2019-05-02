@@ -22,6 +22,7 @@ module.exports = app => {
   router.put('/contacts/:id', contacts.deleteContactById);
 
   router.get('/projects', projects.list);
+  router.get('/projects/name', projects.listName);
   router.post('/projects', projects.create);
   router.get('/projects/:id', projects.read);
 
@@ -35,6 +36,7 @@ module.exports = app => {
 
   router.post('/refunds', refunds.create);  
   router.get('/refunds', refunds.list);
+  router.get('/refunds/summary', refunds.listSummary);
 
   router.get('/teams', teams.list);
   router.post('/teams', teams.create);

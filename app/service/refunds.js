@@ -25,22 +25,34 @@ class RefundsService extends Service {
     return result;
   }
 
-  async list() {
+  async list(projectId, type) {
     const { ctx } = this;
     const { Refunds, Projects } = ctx.model;
     // 所有项目
     const curUser = ctx.user;
     if (!curUser) return 0;
     const teams = curUser.teams;
-    const projectObjArr = await Projects.find({ team: { $in: teams } }, '_id');
     const projectIdArr = [];
-    projectObjArr.forEach(item => projectIdArr.push(item._id));
-    console.log('list refunds : projectIdArr', projectIdArr);
+    if (!projectId) {
+      const projectObjArr = await Projects.find({ team: { $in: teams } }, '_id');
+      projectObjArr.forEach(item => projectIdArr.push(item._id));
+    } else {
+      projectIdArr.push(projectId);
+    }
 
-    const refunds = await Refunds.find({ projectId: { $in: projectIdArr } })
+    console.log('list refunds : projectIdArr', projectIdArr);
+    // if (!type) type = undefined;
+    const query = {
+      projectId: { $in: projectIdArr },
+    };
+    if (type) query.type = type;
+
+    const refunds = await Refunds.find(query)
       .populate('userId', 'name')
       .populate('projectId', 'name')
       .populate('processId', 'name');
+
+    // refunds.projectObjArr = projectObjArr;
     return refunds;
   }
   async readByProjectId(projectId) {
@@ -49,6 +61,10 @@ class RefundsService extends Service {
 
     console.log('readByProjectId', projectId);
     return await RefundAmount.findOne({ projectId });
+  }
+
+  async listSummary() {
+    return await this.list();
   }
 }
 

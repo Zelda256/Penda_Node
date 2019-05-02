@@ -29,6 +29,16 @@ class ProjectService extends Service {
     return await Projects.find({ team: { $in: teams } });
   }
 
+  async listName() {
+    const { ctx } = this;
+    const { Projects } = ctx.model;
+    // 所有项目
+    const curUser = ctx.user;
+    if (!curUser) return;
+    const teams = curUser.teams;
+    return await Projects.find({ team: { $in: teams } }, 'name');
+  }
+
   async read(id) {
     const { ctx } = this;
     const { Projects, Process } = ctx.model;

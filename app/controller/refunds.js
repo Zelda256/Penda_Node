@@ -14,7 +14,8 @@ class RefundsController extends Controller {
   async list() {
     const { ctx } = this;
     const { refunds } = this.service;
-    const result = await refunds.list();
+    const { projectId, type } = ctx.query;
+    const result = await refunds.list(projectId, type);
     if (!result) {
       ctx.body = {
         status: 0,
@@ -27,7 +28,6 @@ class RefundsController extends Controller {
         msg: null
       };
     }
-    
   }
   async readByProjectId() {
     const { ctx } = this;
@@ -39,6 +39,24 @@ class RefundsController extends Controller {
       data: result,
       msg: null
     };
+  }
+
+  async listSummary() {
+    const { ctx } = this;
+    const { refunds } = this.service;
+    const result = await refunds.listSummary();
+    if (!result) {
+      ctx.body = {
+        status: 0,
+        msg: null
+      };
+    } else {
+      ctx.body = {
+        status: 1,
+        data: result,
+        msg: null
+      };
+    }
   }
 }
 
