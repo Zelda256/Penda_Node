@@ -44,7 +44,8 @@ class RefundsController extends Controller {
   async listSummary() {
     const { ctx } = this;
     const { refunds } = this.service;
-    const result = await refunds.listSummary();
+    const { projectId } = ctx.query;
+    const result = await refunds.listSummary(projectId);
     if (!result) {
       ctx.body = {
         status: 0,

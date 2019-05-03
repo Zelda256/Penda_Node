@@ -40,8 +40,6 @@ class RefundsService extends Service {
       projectIdArr.push(projectId);
     }
 
-    console.log('list refunds : projectIdArr', projectIdArr);
-    // if (!type) type = undefined;
     const query = {
       projectId: { $in: projectIdArr },
     };
@@ -52,19 +50,64 @@ class RefundsService extends Service {
       .populate('projectId', 'name')
       .populate('processId', 'name');
 
-    // refunds.projectObjArr = projectObjArr;
     return refunds;
   }
   async readByProjectId(projectId) {
     const { ctx } = this;
     const { RefundAmount } = ctx.model;
 
-    console.log('readByProjectId', projectId);
+    // console.log('readByProjectId', projectId);
     return await RefundAmount.findOne({ projectId });
   }
 
-  async listSummary() {
-    return await this.list();
+  async listSummary(projectId) {
+    const refunds = await this.list(projectId);
+    // console.log('refunds?? ', refunds);
+    const results = [];
+    if (!refunds || !refunds.length) return;
+    refunds.forEach(refundItem => {
+      const projectId = refundItem.projectId._id;
+      const userId = refundItem.userId._id;
+      // 找到报销汇总中对应的项目
+      const project = results.find(item => item.project._id === projectId);
+      if (!project) {
+        results.push({
+          project: refundItem.projectId,
+          summary: [{
+            user: refundItem.userId,
+            refunds: [{
+              type: refundItem.type,
+              value: refundItem.value
+            }]
+          }]
+        });
+      } else {
+        // 找到对应的用户的汇总
+        const userSummary = project.summary.find(item => item.user._id === userId);
+        if (!userSummary) {
+          project.summary.push({
+            user: refundItem.userId,
+            refunds: [{
+              type: refundItem.type,
+              value: refundItem.value
+            }]
+          });
+        } else {
+          // 找到汇总中对应的报销类型
+          const userRefund = userSummary.refunds.find(item => item.type === refundItem.type);
+          if (!userRefund) {
+            userSummary.refunds.push({
+              type: refundItem.type,
+              value: refundItem.value
+            });
+          } else {
+            userRefund.value += refundItem.value;
+          }
+        }
+      }
+    });
+    // console.log('results ????', results);
+    return results;
   }
 }
 
