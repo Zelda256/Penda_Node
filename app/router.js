@@ -26,10 +26,13 @@ module.exports = app => {
   router.post('/projects', projects.create);
   router.get('/projects/:id', projects.read);
 
+  // 根据projectId获取子任务列表
+  router.get('/process/:projectId', process.list);
   // 根据projectId创建子任务
   router.post('/process/:id', process.create);
   // 根据processId更新子任务状态
   router.put('/process/status/:id', process.updateStatus);
+  
 
   router.post('/refundAmount/:id', refundAmount.create);
   router.get('/refundAmount/:id', refundAmount.readByProjectId);
@@ -37,6 +40,7 @@ module.exports = app => {
   router.post('/refunds', refunds.create);  
   router.get('/refunds', refunds.list);
   router.get('/refunds/summary', refunds.listSummary);
+  router.get('/refunds/account/:id', refunds.readAccount);
 
   router.get('/teams', teams.list);
   router.post('/teams', teams.create);

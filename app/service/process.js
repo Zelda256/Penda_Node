@@ -28,8 +28,14 @@ class ProcessService extends Service {
     return result;
   }
 
-  async list() {
-
+  async list(projectId) {
+    const { ctx } = this;
+    const { Projects, Process } = ctx.model;
+    const project = await Projects.findById(projectId, 'process');
+    const processIdArr = project.process;
+    const result = await Process.find({ _id: { $in: processIdArr } });
+    // console.log('!@#!!$ list', result);
+    return result;
   }
   async readById(id) {
     const { ctx } = this;
@@ -50,7 +56,7 @@ class ProcessService extends Service {
     const { Process } = ctx.model;
     const { projects } = this.service;
     const obj = ctx.request.body;
-    console.log('?????obj', obj);
+    // console.log('?????obj', obj);
     const { status, projectId } = obj;
     if (!status) return;
     // 更新子任务状态

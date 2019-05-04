@@ -33,8 +33,9 @@ class RefundsService extends Service {
     if (!curUser) return 0;
     const teams = curUser.teams;
     const projectIdArr = [];
+    let projectObjArr = null;
     if (!projectId) {
-      const projectObjArr = await Projects.find({ team: { $in: teams } }, '_id');
+      projectObjArr = await Projects.find({ team: { $in: teams } }, '_id budget').populate('creator', 'name');
       projectObjArr.forEach(item => projectIdArr.push(item._id));
     } else {
       projectIdArr.push(projectId);
@@ -50,6 +51,20 @@ class RefundsService extends Service {
       .populate('projectId', 'name')
       .populate('processId', 'name');
 
+    // console.log(projectObjArr);
+    const results = [];
+    refunds.forEach(item => {
+
+      let tmpResult = item;
+      const proj = projectObjArr.find(proj => String(proj._id) === String(item.projectId._id));
+      // console.log('98744  proj',proj);
+      tmpResult.projectId.budget = proj.budget ? proj.budget : 0;
+      tmpResult.projectId.creator = proj.creator;
+      // projectObjArr.find(proj => console.log(proj._id));
+      results.push(tmpResult);
+
+    });
+    // console.log(results);
     return refunds;
   }
   async readByProjectId(projectId) {
@@ -77,7 +92,8 @@ class RefundsService extends Service {
             user: refundItem.userId,
             refunds: [{
               type: refundItem.type,
-              value: refundItem.value
+              value: refundItem.value,
+              processId: refundItem.processId._id,
             }]
           }]
         });
@@ -89,7 +105,8 @@ class RefundsService extends Service {
             user: refundItem.userId,
             refunds: [{
               type: refundItem.type,
-              value: refundItem.value
+              value: refundItem.value,
+              processId: refundItem.processId._id,
             }]
           });
         } else {
@@ -98,7 +115,8 @@ class RefundsService extends Service {
           if (!userRefund) {
             userSummary.refunds.push({
               type: refundItem.type,
-              value: refundItem.value
+              value: refundItem.value,
+              processId: refundItem.processId._id,
             });
           } else {
             userRefund.value += refundItem.value;
@@ -107,6 +125,42 @@ class RefundsService extends Service {
       }
     });
     // console.log('results ????', results);
+    return results;
+  }
+
+  async readAccount(projectId) {
+    const { ctx } = this;
+    const { Projects, Process, Refunds } = ctx.model;
+    // const result = await this.listSummary(projectId);
+    const project = await Projects.findById(projectId, 'process');
+    const processIdArr = project.process;
+    const results = [];
+    const processes = await Process.find({ _id: { $in: processIdArr } }, 'name budge cost');
+    const refunds = await Refunds.find({ projectId }, 'processId type value');
+    console.log(refunds);
+    processes.forEach(process => {
+      const { _id, name, budge, cost } = process;
+      let refund = refunds.find(rfd => String(rfd.processId) === String(_id));
+      console.log('refund', refund);
+      if (refund) {
+        const { type, value } = refund;
+        let result = results.find(rlt => String(rlt._id) === String(_id));
+        if (!result) {
+          results.push({
+            _id,
+            name,
+            budge: budge ? budge : 0,
+            cost: cost ? cost : 0,
+            account: [{
+              type,
+              value
+            }],
+          });
+        } else {
+          result.account.value += value;
+        }
+      }
+    });
     return results;
   }
 }

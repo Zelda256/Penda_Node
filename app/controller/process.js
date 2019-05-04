@@ -13,7 +13,16 @@ class ProcessController extends Controller {
     };
   }
   async list() {
-
+    const { ctx } = this;
+    const { process } = this.service;
+    const projectId = ctx.params.projectId;
+    console.log('projectId', projectId);
+    const result = await process.list(projectId);
+    ctx.body = {
+      status: 1,
+      data: result,
+      msg: null
+    };
   }
   async read() {
 

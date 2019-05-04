@@ -59,6 +59,25 @@ class RefundsController extends Controller {
       };
     }
   }
+
+  async readAccount() {
+    const { ctx } = this;
+    const { refunds } = this.service;
+    const projectId = ctx.params.id;
+    const result = await refunds.readAccount(projectId);
+    if (!result) {
+      ctx.body = {
+        status: 0,
+        msg: null
+      };
+    } else {
+      ctx.body = {
+        status: 1,
+        data: result,
+        msg: null
+      };
+    }
+  }
 }
 
 module.exports = RefundsController;
