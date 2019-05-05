@@ -32,7 +32,7 @@ class RefundsController extends Controller {
   async readByProjectId() {
     const { ctx } = this;
     const { refundAmount } = this.service;
-    console.log('??????????????????????');
+    // console.log('??????????????????????');
     const result = await refundAmount.readByProjectId(ctx.params.id);
     ctx.body = {
       status: 1,
@@ -77,6 +77,26 @@ class RefundsController extends Controller {
         msg: null
       };
     }
+  }
+
+  async downloadSummary() {
+    const { ctx } = this;
+    const { refunds } = this.service;
+    const projectId = ctx.params.id;
+    console.log('????????????????', projectId);
+    const result = await refunds.downloadSummary(projectId);
+    // if (!result) {
+    //   ctx.body = {
+    //     status: 0,
+    //     msg: null
+    //   };
+    // } else {
+    //   ctx.body = {
+    //     status: 1,
+    //     data: result,
+    //     msg: null
+    //   };
+    // }
   }
 }
 

@@ -12,15 +12,17 @@
     "egg-passport": "^2.0.1",
     "egg-scripts": "^2.11.0",
     "node-fetch": "^2.3.0",
-    "passport-local": "^1.0.0"
+    "node-xlsx": "^0.14.1",
+    "passport-local": "^1.0.0",
+    "urlencode": "^1.1.0"
   },
   "devDependencies": {
     "autod": "^3.0.1",
     "autod-egg": "^1.1.0",
     "egg-bin": "^4.11.0",
     "egg-ci": "^1.11.0",
-    "egg-scripts": "^2.11.0",
     "egg-mock": "^3.21.0",
+    "egg-scripts": "^2.11.0",
     "eslint": "^5.16.0",
     "eslint-config-egg": "^7.1.0",
     "webstorm-disable-index": "^1.2.0"

@@ -37,9 +37,15 @@ module.exports = app => {
   router.post('/refundAmount/:id', refundAmount.create);
   router.get('/refundAmount/:id', refundAmount.readByProjectId);
 
+  // 创建报销记录
   router.post('/refunds', refunds.create);  
+  // 获取支出列表
   router.get('/refunds', refunds.list);
+  // 获取报销汇总列表
   router.get('/refunds/summary', refunds.listSummary);
+  // 下载某项目的报销汇总表
+  router.get('/refunds/summary/download/:id', refunds.downloadSummary);
+  // 获取某项目的决算表
   router.get('/refunds/account/:id', refunds.readAccount);
 
   router.get('/teams', teams.list);

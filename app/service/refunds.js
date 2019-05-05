@@ -1,4 +1,5 @@
 const Service = require('egg').Service;
+const download = require('./utils/download');
 
 class RefundsService extends Service {
   async create() {
@@ -6,21 +7,21 @@ class RefundsService extends Service {
     const { Refunds } = ctx.model;
     const { process, projects, refundAmount } = ctx.service;
     const item = ctx.request.body;
-    console.log('create refund item', item);
+    // console.log('create refund item', item);
     const refund = new Refunds(item);
     const result = await refund.save();
 
     // 更新子任务花销
     const procUpdate = await process.updateCostById(item.processId, item.value);
-    console.log('create procUpdate', procUpdate);
+    // console.log('create procUpdate', procUpdate);
 
     // 更新项目总剩余额度
     const projUpdate = await projects.updateLeftBudget(item.projectId, item.value);
-    console.log('create projUpdate', projUpdate);
+    // console.log('create projUpdate', projUpdate);
 
     // 更新预算限额
     const refundAmountUpdate = await refundAmount.updateByProjectId(item.projectId, item.type, item.value);
-    console.log('create refundAmountUpdate', refundAmountUpdate);
+    // console.log('create refundAmountUpdate', refundAmountUpdate);
 
     return result;
   }
@@ -38,6 +39,7 @@ class RefundsService extends Service {
       projectObjArr = await Projects.find({ team: { $in: teams } }, '_id budget').populate('creator', 'name');
       projectObjArr.forEach(item => projectIdArr.push(item._id));
     } else {
+      projectObjArr = await Projects.find({ _id: projectId }, '_id budget').populate('creator', 'name');
       projectIdArr.push(projectId);
     }
 
@@ -162,6 +164,29 @@ class RefundsService extends Service {
       }
     });
     return results;
+  }
+
+  async downloadSummary(projectId) {
+    const { ctx } = this;
+    const projSummary = await this.listSummary(projectId);
+    // console.log(projSummary);
+    const projectName = projSummary[0].project.name;
+    // console.log(projectName);
+    const summary = projSummary[0].summary;
+    const excelData = [['姓名', '差旅费', '材料费', '文献出版费', '劳务费', '专家咨询费', '设备费', '合计']];
+    summary.forEach(sum => {
+      const data = [sum.user.name, '', '', '', '', '', ''];
+      let total = 0;
+      sum.refunds.forEach(refund => {
+        data[refund.type] = refund.value;
+        total += refund.value;
+      });
+      data.push(total);
+      excelData.push(data);
+    });
+    const fileName = projectName + '_报销汇总表.xlsx';
+    download.exportExcel(ctx, excelData, fileName);
+    return excelData;
   }
 }
 
