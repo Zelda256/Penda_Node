@@ -11,9 +11,11 @@ module.exports = app => {
     },
     budge: {
       type: Number,
+      require: true,
     },
     cost: {
       type: Number,
+      require: true,
     },
     member: [{
       type: Schema.Types.ObjectId,

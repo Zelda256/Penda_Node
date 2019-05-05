@@ -10,6 +10,7 @@ class RefundsService extends Service {
     // console.log('create refund item', item);
     const refund = new Refunds(item);
     const result = await refund.save();
+    console.log(result);
 
     // 更新子任务花销
     const procUpdate = await process.updateCostById(item.processId, item.value);
@@ -79,7 +80,7 @@ class RefundsService extends Service {
 
   async listSummary(projectId) {
     const refunds = await this.list(projectId);
-    // console.log('refunds?? ', refunds);
+    console.log('refunds?? ', refunds);
     const results = [];
     if (!refunds || !refunds.length) return;
     refunds.forEach(refundItem => {
@@ -135,31 +136,45 @@ class RefundsService extends Service {
     const { Projects, Process, Refunds } = ctx.model;
     // const result = await this.listSummary(projectId);
     const project = await Projects.findById(projectId, 'process');
+
     const processIdArr = project.process;
     const results = [];
     const processes = await Process.find({ _id: { $in: processIdArr } }, 'name budge cost');
     const refunds = await Refunds.find({ projectId }, 'processId type value');
-    console.log(refunds);
-    processes.forEach(process => {
-      const { _id, name, budge, cost } = process;
-      let refund = refunds.find(rfd => String(rfd.processId) === String(_id));
-      console.log('refund', refund);
-      if (refund) {
-        const { type, value } = refund;
-        let result = results.find(rlt => String(rlt._id) === String(_id));
-        if (!result) {
-          results.push({
-            _id,
-            name,
-            budge: budge ? budge : 0,
-            cost: cost ? cost : 0,
-            account: [{
-              type,
-              value
-            }],
-          });
+    // console.log('refunds refunds refunds', refunds);
+    // console.log('processes processes processes', processes);
+
+    refunds.forEach(refund => {
+      const { type, value } = refund;
+
+      const result = results.find(res => String(res._id) === String(refund.processId));
+      const process = processes.find(proc => String(proc._id) === String(refund.processId));
+      if (!result) { // 如果当前报销记录的子任务未曾出现在决算表中
+        results.push({
+          _id: refund.processId,
+          name: process.name,
+          budge: process.budge ? process.budge : 0,
+          cost: process.cost ? process.cost : 0,
+          account: [{
+            type,
+            value
+          }],
+        });
+      } else { // 如果当前报销记录的子任务已出现在决算表中，则更新一个account或account中的value
+        if (result.account.find(act => act.type === type)) {
+          // console.log('11111111111');
+          result.account = result.account.map(act => {
+            if (act.type === type) {
+              act.value += value;
+            }
+          }
+          );
         } else {
-          result.account.value += value;
+          // console.log('222222222');
+          result.account.push({
+            type,
+            value
+          });
         }
       }
     });
@@ -174,16 +189,22 @@ class RefundsService extends Service {
     // console.log(projectName);
     const summary = projSummary[0].summary;
     const excelData = [['姓名', '差旅费', '材料费', '文献出版费', '劳务费', '专家咨询费', '设备费', '合计']];
+    let allTotal = 0;
+    let feeTotal = [0, 0, 0, 0, 0, 0, 0];
     summary.forEach(sum => {
       const data = [sum.user.name, '', '', '', '', '', ''];
-      let total = 0;
+      let rowTotal = 0;
       sum.refunds.forEach(refund => {
         data[refund.type] = refund.value;
-        total += refund.value;
+        feeTotal[refund.type] += refund.value;
+        rowTotal += refund.value;
       });
-      data.push(total);
+      allTotal += rowTotal;
+      data.push(rowTotal);
       excelData.push(data);
     });
+    let lastRow = `合计(${allTotal}元)： 1.差旅费：${feeTotal[1]}元; 2.材料费：${feeTotal[2]}元; 3.文献出版费：${feeTotal[3]}元; 4.劳务费：${feeTotal[4]}元; 5.专家咨询费：${feeTotal[5]}元; 6.设备费：${feeTotal[6]}元;`;
+    excelData.push([lastRow]);
     const fileName = projectName + '_报销汇总表.xlsx';
     download.exportExcel(ctx, excelData, fileName);
     return excelData;

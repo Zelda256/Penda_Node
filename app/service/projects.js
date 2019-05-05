@@ -4,19 +4,40 @@ const fetch = require('node-fetch');
 class ProjectService extends Service {
   async create() {
     const { ctx } = this;
-    const { Projects } = ctx.model;
+    const { Projects, RefundAmount } = ctx.model;
     const item = ctx.request.body;
-    item.progress = 0;
+    const { maxTravel, maxStuff, maxPublish, maxConsult, maxLabor, maxDevice } = item;
+    item.progress = item.status === 3 ? 100 : 0;
     item.leftBudget = item.budget;
+    item.process = [];
     await fetch('https://www.random.org/strings/?num=1&len=5&digits=on&upperalpha=on&loweralpha=on&format=plain')
       .then(res => res.text())
       .then(text => item.id = text.substr(0, 5));  // 删除换行符
-    if (item.id) {
-      const project = new Projects(item);
-      const result = await project.save();
-      return result;
+
+    if (!item.id) {
+      return false;
     }
-    return false;
+    const project = new Projects(item);
+    const result = await project.save();
+
+    const refundAmount = new RefundAmount({
+      projectId: result._id,
+      maxTravel,
+      maxStuff,
+      maxPublish,
+      maxConsult,
+      maxLabor,
+      maxDevice,
+      leftPublish: maxPublish,
+      leftTravel: maxTravel,
+      leftStuff: maxStuff,
+      leftLabor: maxLabor,
+      leftConsult: maxConsult,
+      leftDevice: maxDevice,
+    });
+    await refundAmount.save();
+    return result;
+
   }
 
   async list() {
@@ -97,7 +118,7 @@ class ProjectService extends Service {
     const { Projects } = ctx.model;
     const progress = ((finishProc / totalProc).toFixed(2) * 100).toFixed(0);
 
-    console.log('计算progress:',finishProc, totalProc, progress);
+    console.log('计算progress:', finishProc, totalProc, progress);
 
     return await Projects.updateOne({ _id }, { progress });
   }

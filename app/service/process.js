@@ -3,27 +3,34 @@ const Service = require('egg').Service;
 class ProcessService extends Service {
   async create() {
     const { ctx } = this;
-    const { Process } = ctx.model;
+    const { Process, Projects } = ctx.model;
     const { projects } = this.service;
     const item = ctx.request.body;
-    const _id = ctx.params.id;
+    // console.log('item', item);
+    item.budge = item.budge ? item.budge : 0;
+    item.cost = 0;
+    const projectId = ctx.params.id;
+    let finishCnt = 0;
+    if (item.status === 3) finishCnt += 1;
 
     // 创建process对象
     const process = new Process(item);
     const result = await process.save();
+    // console.log('ressssss', result);
     // 找到对应project
-    const project = await projects.read(_id);
-    // console.log('project$!$@#@#', project);
+    const project = await projects.read(projectId);
+    project.process.forEach(process => {
+      // console.log('process：', process._id);
+      if (process.status === 3) { finishCnt += 1; }
+    });
+    const processCnt = project.process ? project.process.length + 1 : 1;
+
     // 更新project的process
     if (project.process) project.process.push(result._id);
     else project.process = [result._id];
+    await Projects.updateOne({ _id: projectId }, { process: project.process });
     // 更新project的progress
-    let finishCnt = 0;
-    project.process.forEach(process => {
-      if (process.status === 3) { finishCnt++; console.log(process._id); }
-    });
-    const processCnt = project.process ? project.process.length : 0;
-    await projects.updateProgress(_id, finishCnt, processCnt);
+    await projects.updateProgress(projectId, finishCnt, processCnt);
 
     return result;
   }
@@ -47,7 +54,12 @@ class ProcessService extends Service {
     const { ctx } = this;
     const { Process } = ctx.model;
     const processCost = await this.readById(id);
-    processCost.cost += costValue;
+    if (processCost.cost) {
+      processCost.cost += costValue;
+    }
+    else {
+      processCost.cost = costValue;
+    }
     return await Process.updateOne({ _id: id }, { cost: processCost.cost });
   }
 
