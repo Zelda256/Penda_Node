@@ -3,9 +3,8 @@ const fs = require('fs');
 const urlencode = require('urlencode');
 
 module.exports = {
-
-  exportExcel: (ctx, data, fileName) => {
-    const buffer = xlsx.build([{ name: 'mySheetName', data, }]);
+  exportExcel: (ctx, data, fileName, options ) => {
+    const buffer = xlsx.build([{ name: 'sheet1', data, }], options);
     fs.writeFileSync(fileName, buffer, { 'flag': 'w' }, err => {
       if (err) console.log(err);
     }); // 如果文件存在，覆盖

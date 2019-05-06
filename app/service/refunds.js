@@ -1,5 +1,6 @@
 const Service = require('egg').Service;
 const download = require('./utils/download');
+const moment = require('moment');
 
 class RefundsService extends Service {
   async create() {
@@ -10,7 +11,7 @@ class RefundsService extends Service {
     // console.log('create refund item', item);
     const refund = new Refunds(item);
     const result = await refund.save();
-    console.log(result);
+    // console.log(result);
 
     // 更新子任务花销
     const procUpdate = await process.updateCostById(item.processId, item.value);
@@ -206,8 +207,77 @@ class RefundsService extends Service {
     let lastRow = `合计(${allTotal}元)： 1.差旅费：${feeTotal[1]}元; 2.材料费：${feeTotal[2]}元; 3.文献出版费：${feeTotal[3]}元; 4.劳务费：${feeTotal[4]}元; 5.专家咨询费：${feeTotal[5]}元; 6.设备费：${feeTotal[6]}元;`;
     excelData.push([lastRow]);
     const fileName = projectName + '_报销汇总表.xlsx';
-    download.exportExcel(ctx, excelData, fileName);
+    const fileOptions = {
+      '!cols': [{ wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }],
+      '!merges': [{ s: { c: 0, r: excelData.length - 1 }, e: { c: 7, r: excelData.length - 1 } }],
+    };
+    download.exportExcel(ctx, excelData, fileName, fileOptions);
     return excelData;
+  }
+
+  async downloadRefund(projectId, type) {
+    const { ctx } = this;
+    const refunds = await this.list(projectId, type);
+    const excelData = [['项目名称', '任务名称', '报销日期', '报销类型', '报销人', '报销金额']];
+    refunds.forEach(refund => {
+      let date = moment(refund.date).format('YYYY-MM-DD');
+      let type = '';
+      switch (refund.type) {
+      case 1: type = '差旅费'; break;
+      case 2: type = '材料费'; break;
+      case 3: type = '文献出版费'; break;
+      case 4: type = '劳务费'; break;
+      case 5: type = '专家咨询费'; break;
+      case 6: type = '设备费'; break;
+      }
+      const data = [refund.projectId.name, refund.processId.name, date, type, refund.userId.name, refund.value];
+      excelData.push(data);
+    });
+    const fileName = '报销汇总表.xlsx';
+    const fileOptions = { '!cols': [{ wch: 20 }, { wch: 20 }, { wch: 16 }, { wch: 16 }, { wch: 12 }, { wch: 12 }] };
+    download.exportExcel(ctx, excelData, fileName, fileOptions);
+  }
+
+  async downloadAccount(projectId) {
+    const { ctx } = this;
+    const { Projects } = ctx.model;
+    const accounts = await this.readAccount(projectId);
+    const project = await Projects.findById(projectId).populate('creator');
+    let firstRow = `项目名称：${project.name}    项目负责人：${project.creator.name}    项目总预算：${project.budget}    金额单位：元`;
+    const excelData = [[firstRow],
+      ['序号', '任务名称', '预算数', '累计支出', '支出情况'],
+      ['', '', '', '', '差旅费', '材料费', '文献出版费', '劳务费', '专家咨询费', '设备费', '决算数']
+    ];
+    const fileOptions = {
+      '!cols': [{ wch: 8 }, { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 }],
+      '!merges': [
+        { s: { c: 0, r: 0 }, e: { c: 10, r: 0 } },
+
+        { s: { c: 4, r: 1 }, e: { c: 9, r: 1 } },
+        // { s: { c: 10, r: 1 }, e: { c: 10, r: 2 } },
+        { s: { c: 0, r: 1 }, e: { c: 0, r: 2 } },
+        { s: { c: 1, r: 1 }, e: { c: 1, r: 2 } },
+        { s: { c: 2, r: 1 }, e: { c: 2, r: 2 } },
+        { s: { c: 3, r: 1 }, e: { c: 3, r: 2 } },
+      ],
+    };
+    let index = 1;
+    accounts.forEach(acnt => {
+      let data = [index, acnt.name, acnt.budge, acnt.cost];
+      index++;
+      let refundData = [0, 0, 0, 0, 0, 0, acnt.budge - acnt.cost];
+      acnt.account.forEach(item => {
+        refundData[item.type - 1] += item.value;
+      });
+      // console.log(refundData);
+      data.push(...refundData);
+      // data.push(acnt.budge - acnt.cost);
+      excelData.push(data);
+    });
+    // console.log(excelData);
+    const fileName = project.name + '_项目决算表.xlsx';
+    download.exportExcel(ctx, excelData, fileName, fileOptions);
+    // return excelData;
   }
 }
 

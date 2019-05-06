@@ -83,8 +83,23 @@ class RefundsController extends Controller {
     const { ctx } = this;
     const { refunds } = this.service;
     const projectId = ctx.params.id;
-    console.log('????????????????', projectId);
-    const result = await refunds.downloadSummary(projectId);
+    // console.log('????????????????', projectId);
+    await refunds.downloadSummary(projectId);
+  }
+
+  async downloadRefund() {
+    const { ctx } = this;
+    const { refunds } = this.service;
+    const { projectId, type } = ctx.query;
+    await refunds.downloadRefund(projectId, type);
+  }
+
+  async downloadAccount() {
+    const { ctx } = this;
+    const { refunds } = this.service;
+    const projectId = ctx.params.id;
+    // const result = 
+    await refunds.downloadAccount(projectId);
     // if (!result) {
     //   ctx.body = {
     //     status: 0,

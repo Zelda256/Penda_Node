@@ -109,7 +109,7 @@ class ProjectService extends Service {
   }
   async updateLeftBudget(_id, leftBudgetValue) {
     const project = await this.findOne(_id);
-    console.log('$$$@#$', project);
+    // console.log('$$$@#$', project);
     project.leftBudget -= leftBudgetValue;
     return await this.updateById(_id, project);
   }

@@ -41,12 +41,16 @@ module.exports = app => {
   router.post('/refunds', refunds.create);  
   // 获取支出列表
   router.get('/refunds', refunds.list);
+  // 下载支出列表
+  router.get('/refunds/download', refunds.downloadRefund);
   // 获取报销汇总列表
   router.get('/refunds/summary', refunds.listSummary);
   // 下载某项目的报销汇总表
   router.get('/refunds/summary/download/:id', refunds.downloadSummary);
   // 获取某项目的决算表
   router.get('/refunds/account/:id', refunds.readAccount);
+  // 下载某项目的决算表
+  router.get('/refunds/account/download/:id', refunds.downloadAccount);
 
   router.get('/teams', teams.list);
   router.post('/teams', teams.create);
