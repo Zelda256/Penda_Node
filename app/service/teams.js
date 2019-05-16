@@ -18,9 +18,28 @@ class TeamsService extends Service {
 
   async list() {
     const { ctx } = this;
-    const { Teams } = ctx.model;
+    const { Teams, Projects } = ctx.model;
+    const teams = await Teams.find({_id: { $in : ctx.user.teams}}).populate('member');
+    const projs = await Projects.find({team: {$in: ctx.user.teams}}, 'name team status');
+    const result = [];
+    teams.forEach(team => {
+      let tmpResult = {
+        _id : team._id,
+        name: team.name,
+        member: team.member,
+        proj: []
+      };
+      result.push(tmpResult);
+    });
+    projs.forEach(project => {
+      let team = result.find(res => String(res._id) === String(project.team));
+      if (team) {
+        team.proj.push(project);
+      }
+      
+    });
 
-    return await Teams.find({_id: { $in : ctx.user.teams}}).populate('member');
+    return result;
   }
 
   async readById(_id) {
